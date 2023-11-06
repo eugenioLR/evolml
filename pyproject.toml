@@ -1,0 +1,40 @@
+[build-system]
+requires = ["setuptools"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "evolml"
+version = "0.0.1"
+authors = [
+    {name = "eugenioLR", email = "eugeniolorente0@gmail.com"}
+]
+description = "A python package for machine learning tasks using evolutionary algorithms."
+readme = "README.md"
+requires-python = ">=3.11"
+keywords = ["optization", "evolutionary-algorithms", "machine-learning"]
+license = {text = "LICENSE"}
+dependencies = [
+    "numpy>=1.21",
+    "scipy>=1.8",
+    "matplotlib>=3.5",
+    "seaborn",
+    "scikit-learn",
+    "sympy",
+    "pandas",
+    "torch",
+    "metaheuristic-designer"
+]
+
+[project.urls]
+Homepage = "https://github.com/eugenioLR/metaheuristic-designer"
+
+[project.optional-dependencies]
+dev = [
+    "nox>=2023.4.22",
+    "pytest>=7.4.0",
+    "coverage>=7.3.1",
+    "sphinx_material>=0.0.36",
+    "sphinx>=7.1.1",
+    "black"
+]
+

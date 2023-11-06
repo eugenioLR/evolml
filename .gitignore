@@ -1,0 +1,12 @@
+__pycache__/
+*/__pycache__
+.nox/
+.pytest_cache/
+.coverage
+.coverage*
+htmlcov/
+dist/
+docs/_build/
+venv/
+build/
+*.egg*
