@@ -12,7 +12,7 @@ def main(n_features, n_informative):
     baseline_model = Ridge()
 
     optim_algorithm = genetic_algorithm(
-        objfunc=None, params={"stop_cond": "time_limit", "time_limit": 10.0, "min": 0, "max": n_features, "encoding": "int"}
+        objfunc=None, params={"stop_cond": "time_limit", "time_limit": 30.0, "min": 0, "max": n_features, "encoding": "int"}
     )
 
     mask, sparse_mask, score = select_features(
@@ -20,7 +20,7 @@ def main(n_features, n_informative):
         baseline_model=baseline_model,
         X_train=X_train,
         y_train=y_train,
-        n_features=n_informative - 1,
+        n_features=n_informative,
         cv_splits=5,
         cv_repeats=10,
         random_state=None,
