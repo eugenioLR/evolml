@@ -11,15 +11,24 @@ def main(n_features, n_informative):
 
     baseline_model = Ridge()
 
-    optim_alg = genetic_algorithm(
+    optim_algorithm = genetic_algorithm(
         objfunc=None, params={"stop_cond": "time_limit", "time_limit": 10.0, "min": 0, "max": n_features, "encoding": "int"}
     )
 
-    mask, sparse_mask, score = select_features(optim_alg, baseline_model, X_train, y_train, n_informative - 1, cv_splits=5, cv_repeats=10, random_state=None)
+    mask, sparse_mask, score = select_features(
+        optim_algorithm=optim_algorithm,
+        baseline_model=baseline_model,
+        X_train=X_train,
+        y_train=y_train,
+        n_features=n_informative - 1,
+        cv_splits=5,
+        cv_repeats=10,
+        random_state=None,
+    )
 
-    print(mask)
-    print(sparse_mask)
-    print(score)
+    print(f"binary feature mask: {mask}")
+    print(f"selected feature indexes: {sparse_mask}")
+    print(f"R2 score in cross-validation: {score}")
 
 
 if __name__ == "__main__":
