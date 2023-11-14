@@ -20,8 +20,8 @@ from pyevolcomp import ObjectiveFunc, ObjectiveVectorFunc
 from pyevolcomp.simple import *
 
 
-class SymbolicRegression(ObjectiveVectorFunc):
-    def __init__(self, equation_str, X_train, y_train):
+class ParametricSymbolicModelObj(ObjectiveVectorFunc):
+    def __init__(self, equation_str, X_train=None, y_train=None):
         self.equation_str = equation_str
         self.equation = sympy.parsing.sympy_parser.parse_expr(equation_str)
         self.equation = sympy.simplify(self.equation)
@@ -40,8 +40,14 @@ class SymbolicRegression(ObjectiveVectorFunc):
         self.X_train = X_train
         self.y_train = y_train
 
-        super().__init__(len(self.curve_params), mode="max", low_lim=-100, up_lim=100)
+        super().__init__(len(self.curve_params), mode="max", low_lim=-100, up_lim=100, name="Symbolic regression")
 
+    def set_data(self, X, y):
+        self.X_train = X
+        self.y_train = y
+
+
+class ParametricSymbolicClassificationObj(ParametricSymbolicModelObj):
     def decision_boundary(self):
         return sympy.Eq(self.equation, 0)
 
@@ -62,23 +68,27 @@ class SymbolicRegression(ObjectiveVectorFunc):
         return pred
 
     def objective(self, vector):
-        pred = self.predict(vector)
-
-        return roc_auc_score(self.y_train, pred)
+        return roc_auc_score(self.y_train, self.predict(vector))
 
 
-def test():
-    # X = np.array([[-2,-1,0,1,2]]).T
-    # y = np.array([0,0,0,1,1])
-    X = np.arange(1000).reshape((-1, 1))
-    y = (X > 500).astype(int)
+class ParametricSymbolicRegressionObj(ParametricSymbolicModelObj):
+    def decision_boundary(self):
+        return sympy.Eq(self.equation, sympy.symbols(f"x_{len(self.input_params)}"))
 
-    objfunc = SymbolicRegression("p_0 + p_1*x_0 + p_2*x_0**2 + p_3*x_0**3", X, y)
-    print(objfunc.predict(np.array([0, 1, 1, -1])))
-    print(objfunc.objective(np.array([0, 1, 1, -1])))
-    sympy.pprint(objfunc.decision_boundary())
+    def predict(self, vector):
+        try:
+            model_eq = self.equation.subs(zip(self.curve_params, vector))
+            model = sympy.lambdify(self.input_params, model_eq)
 
+            pred = np.empty_like(self.y_train)
+            for idx, data_point in enumerate(self.X_train):
+                pred[idx] = float(model(*data_point))
 
-if __name__ == "__main__":
-    for i in range(100):
-        test()
+        except Exception as e:
+            print(e)
+            pred = np.zeros_like(self.y_train)
+
+        return pred
+
+    def objective(self, vector):
+        return r2_score(self.y_train, self.predict(vector))
