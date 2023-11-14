@@ -1,6 +1,8 @@
 import sklearn
+from sklearn.base import BaseEstimator, ClassifierMixin, RegressorMixin
 from sklearn.datasets import make_blobs, make_classification
-from sklearn.metrics import accuracy_score, roc_auc_score
+from sklearn.metrics import accuracy_score, roc_auc_score, r2_score
+
 import numpy as np
 import pandas as pd
 import matplotlib.pyplot as plt
@@ -12,12 +14,14 @@ import sympy
 import sympy.abc
 from sympy.plotting.plot import MatplotlibBackend, Plot
 
-import pyevolcomp as pec
-from pyevolcomp import Algorithms
-from pyevolcomp import Operators
-from pyevolcomp import SearchMethods
-from pyevolcomp import ObjectiveFunc, ObjectiveVectorFunc
-from pyevolcomp.simple import *
+import metaheuristic_designer as pec
+from metaheuristic_designer import algorithms
+from metaheuristic_designer import strategies
+from metaheuristic_designer import operators
+from metaheuristic_designer import initializers
+from metaheuristic_designer import ObjectiveFunc, ObjectiveVectorFunc
+from metaheuristic_designer.simple import *
+
 
 
 class ParametricSymbolicModelObj(ObjectiveVectorFunc):

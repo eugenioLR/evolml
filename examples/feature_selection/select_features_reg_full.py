@@ -41,4 +41,4 @@ def main(n_features, n_informative):
 
 
 if __name__ == "__main__":
-    main(15, 7)
+    main(15, 4)
