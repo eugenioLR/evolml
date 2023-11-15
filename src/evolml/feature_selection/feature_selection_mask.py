@@ -57,9 +57,6 @@ class EvalFeatureSelectionMaskCV(ObjectiveVectorFunc):
 
         return final_score / n_evals
 
-def restart_model(trained_model):
-    return type(trained_model)(**trained_model.get_params())
-
 def select_features(optim_algorithm, baseline_model, X_train, y_train, n_features, cv_splits=5, cv_repeats=10, random_state=None, pop_size=100):
     baseline_model = restart_model(baseline_model)
     
