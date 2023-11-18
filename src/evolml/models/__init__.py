@@ -1,1 +1,2 @@
-from .parametric_symbolic_regression import *
+from .symbolic_regression import *
+from .neuroevolution import *

@@ -6,13 +6,28 @@ from metaheuristic_designer.simple import *
 
 
 def main(n_features, n_informative):
-    X, y = make_regression(n_samples=500, n_features=n_features, n_informative=n_informative, noise=0.01, n_targets=1)
+    X, y = make_regression(
+        n_samples=1500,
+        n_features=n_features,
+        n_informative=n_informative,
+        noise=0.01,
+        n_targets=1,
+    )
+
     X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.25)
 
     baseline_model = Ridge()
 
     optim_algorithm = genetic_algorithm(
-        objfunc=None, params={"stop_cond": "time_limit", "time_limit": 30.0, "min": 0, "max": n_features, "encoding": "int"}
+        objfunc=None,
+        params={
+            "stop_cond": "time_limit",
+            "time_limit": 30.0,
+            "vecsize": n_informative,
+            "min": 0,
+            "max": n_features,
+            "encoding": "int",
+        },
     )
 
     mask, sparse_mask, score = select_features(
@@ -32,4 +47,4 @@ def main(n_features, n_informative):
 
 
 if __name__ == "__main__":
-    main(15, 7)
+    main(15, 4)

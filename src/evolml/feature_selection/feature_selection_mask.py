@@ -24,13 +24,15 @@ class SparseMaskEncoding(Encoding):
 
 
 class EvalFeatureSelectionMaskCV(ObjectiveVectorFunc):
-    def __init__(self, baseline_model, X_train, y_train, n_features, cv_splits=5, cv_repeats=10, metric_fn=r2_score, random_state=None):
+    def __init__(self, baseline_model, X_train, y_train, n_features, cv_splits=5, cv_repeats=10, metric_fn=None, random_state=None):
         self.baseline_model = baseline_model
         self.X_train = X_train
         self.y_train = y_train
         self.cv_splits = cv_splits
         self.cv_repeats = cv_repeats
         self.random_state = random_state
+        if metric_fn is None:
+            metric_fn = r2_score
         self.metric_fn = metric_fn
         n_base_features = reduce(lambda x, y: x * y, X_train.shape[1:])
 

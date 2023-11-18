@@ -75,7 +75,7 @@ class GEPEncoding(Encoding):
         return formula
 
 
-class GEPPSEncoding(GEPEncoding):
+class GEPPSEMncoding(GEPEncoding):
     def __init__(self, max_size, op_size, input_dim, n_params, operators=None):
         if operators is None:
             operators = [("+", 2), ("-", 2), ("*", 2), ("/", 2)]
@@ -98,6 +98,15 @@ class GEPPSEncoding(GEPEncoding):
         
         return super().decode(genotype_mod)
 
+
+class EvalGEPModel(ObjectiveVectorFunc):
+    def __init__(self):
+        pass
+
+    def objective(self, eq_str):
+        pass
+
+
 def print_tree(tree, level=0):
     print(level*"  " + str(tree[0][0]))
     if len(tree) == 3:
@@ -105,13 +114,17 @@ def print_tree(tree, level=0):
         print_tree(tree[2], level+1)
 
 if __name__ == "__main__":
+    import sympy
+
     gpeenc = GEPPSEncoding(15, 7, 4, 4)
     
     encoded = np.array([1,2,0,2,4,2,3,-1,-1,2,-1,6.0,1.5,1.2,-1])
     # encoded = np.array([1,2,0,2,4,2,3,"x","x",2.0,"x",6.0,1.5,1.2,"x"])
     tree = gpeenc.decode(encoded)
 
+    equation = sympy.parsing.sympy_parser.parse_expr(tree)
 
-        
-
+    print(equation)
+    for i in range(4):
+        print(sympy.diff(equation, f"p_{i}"))
 
