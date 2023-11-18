@@ -23,7 +23,6 @@ from metaheuristic_designer import ObjectiveFunc, ObjectiveVectorFunc
 from metaheuristic_designer.simple import *
 
 
-
 class ParametricSymbolicModelObj(ObjectiveVectorFunc):
     def __init__(self, equation_str, X_train=None, y_train=None, metric_fn=None):
         self.equation_str = equation_str
@@ -50,7 +49,12 @@ class ParametricSymbolicModelObj(ObjectiveVectorFunc):
     def set_data(self, X, y):
         self.X_train = X
         self.y_train = y
-    
+
+    def predict(self, vector):
+        """
+        Predict using the model
+        """
+
     def objective(self, vector):
         return self.metric_fn(self.y_train, self.predict(vector))
 
@@ -79,11 +83,12 @@ class ParametricSymbolicClassificationObj(ParametricSymbolicModelObj):
 
         return pred
 
+
 class ParametricSymbolicRegressionObj(ParametricSymbolicModelObj):
     def __init__(self, equation_str, X_train=None, y_train=None, metric_fn=None):
         if metric_fn is None:
             metric_fn = mean_squared_error
-    
+
     def decision_boundary(self):
         return sympy.Eq(self.equation, sympy.symbols(f"x_{len(self.input_params)}"))
 
