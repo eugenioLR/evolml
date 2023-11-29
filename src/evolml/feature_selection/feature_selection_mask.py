@@ -7,6 +7,7 @@ from metaheuristic_designer.initializers import UniformVectorInitializer
 from functools import reduce
 import numpy as np
 
+
 class SparseMaskEncoding(Encoding):
     def __init__(self, shape):
         self.shape = shape
@@ -36,7 +37,7 @@ class EvalFeatureSelectionMaskCV(ObjectiveVectorFunc):
         self.metric_fn = metric_fn
         n_base_features = reduce(lambda x, y: x * y, X_train.shape[1:])
 
-        super().__init__(n_features, mode="max", low_lim=0, up_lim=n_base_features-1, name="Evaluate Masked Feature Selection")
+        super().__init__(n_features, mode="max", low_lim=0, up_lim=n_base_features - 1, name="Evaluate Masked Feature Selection")
 
     def objective(self, vector):
         X_train_masked = self.X_train[:, vector != 0]
@@ -59,13 +60,14 @@ class EvalFeatureSelectionMaskCV(ObjectiveVectorFunc):
 
         return final_score / n_evals
 
+
 def select_features(optim_algorithm, baseline_model, X_train, y_train, n_features, cv_splits=5, cv_repeats=10, random_state=None, pop_size=100):
     baseline_model = restart_model(baseline_model)
-    
+
     if optim_algorithm.initializer is not None:
         pop_size = optim_algorithm.initializer.pop_size
-    
-    objfunc = EvalFeatureSelectionMaskCV(baseline_model, X_train, y_train, n_features, cv_splits, cv_repeats, random_state) 
+
+    objfunc = EvalFeatureSelectionMaskCV(baseline_model, X_train, y_train, n_features, cv_splits, cv_repeats, random_state)
     encoding = SparseMaskEncoding(X_train.shape[1:])
     initializer = UniformVectorInitializer(objfunc.vecsize, objfunc.low_lim, objfunc.up_lim, pop_size=100, encoding=encoding, dtype=int)
     optim_algorithm.objfunc = objfunc
