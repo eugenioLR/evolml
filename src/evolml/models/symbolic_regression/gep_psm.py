@@ -1,5 +1,5 @@
 
-from metaheuristic_designer import Encoding
+from metaheuristic_designer import Encoding, ObjectiveVectorFunc
 import numpy as np
 
 class GEPEncoding(Encoding):
@@ -52,11 +52,10 @@ class GEPEncoding(Encoding):
     def _generate_expression(self, expr_tree):
         final_str = ""
         if len(expr_tree) == 3:
-            final_str = self._generate_expression(expr_tree[1]) + str(expr_tree[0][0]) + self._generate_expression(expr_tree[2])
+            final_str = "(" + self._generate_expression(expr_tree[1]) + str(expr_tree[0][0]) + self._generate_expression(expr_tree[2]) + ")"
         elif len(expr_tree) == 1:
             final_str = str(expr_tree[0][0])
         else:
-            print(expr_tree)
             final_str = str(expr_tree[0][0]) + "(" + ",".join([self._generate_expression(i) for i in expr_tree[1:]]) + ")"
 
         return final_str
@@ -65,17 +64,13 @@ class GEPEncoding(Encoding):
         """
         """
 
-        print(genotype)
         expr_tree = self._construct_tree(genotype)
-        print(expr_tree)
-        print_tree(expr_tree)
         formula = self._generate_expression(expr_tree)
-        print(formula)
 
         return formula
 
 
-class GEPPSEMncoding(GEPEncoding):
+class GEPPSMEncoding(GEPEncoding):
     def __init__(self, max_size, op_size, input_dim, n_params, operators=None):
         if operators is None:
             operators = [("+", 2), ("-", 2), ("*", 2), ("/", 2)]
@@ -116,15 +111,16 @@ def print_tree(tree, level=0):
 if __name__ == "__main__":
     import sympy
 
-    gpeenc = GEPPSEncoding(15, 7, 4, 4)
+    gpeenc = GEPPSMEncoding(15, 7, 4, 4)
     
-    encoded = np.array([1,2,0,2,4,2,3,-1,-1,2,-1,6.0,1.5,1.2,-1])
-    # encoded = np.array([1,2,0,2,4,2,3,"x","x",2.0,"x",6.0,1.5,1.2,"x"])
+    # encoded = np.array([1,2,0,2,4,2,3,-1,-1,-2,-3,1,-4,4,-1])
+    encoded = np.random.randint(-4, 4, size=15)
     tree = gpeenc.decode(encoded)
+    print(type(tree))
 
     equation = sympy.parsing.sympy_parser.parse_expr(tree)
 
     print(equation)
     for i in range(4):
-        print(sympy.diff(equation, f"p_{i}"))
+        print(f"partial[p_{i}](f) = ", sympy.diff(equation, f"p_{i}"))
 

@@ -10,7 +10,7 @@ authors = [
 ]
 description = "A python package for machine learning tasks using evolutionary algorithms."
 readme = "README.md"
-requires-python = ">=3.11"
+requires-python = ">=3.10"
 keywords = ["optization", "evolutionary-algorithms", "machine-learning"]
 license = {text = "LICENSE"}
 dependencies = [
@@ -22,7 +22,9 @@ dependencies = [
     "sympy",
     "pandas",
     "torch",
-    "metaheuristic-designer"
+    "metaheuristic-designer",
+    "enlighten",
+    "sklearn-neuro-evolution"
 ]
 
 [project.urls]
