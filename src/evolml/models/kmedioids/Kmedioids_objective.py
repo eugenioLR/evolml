@@ -17,10 +17,10 @@ class KmedioidsObjective(ObjectiveVectorFunc):
             metric_fn = silhouette_score
         self.metric_fn = metric_fn
         super().__init__(vecsize=k, low_lim=0, up_lim=dataset.shape[0], mode=mode)
-    
+
     def compute_distance(self, medioids, X):
         return sp.spatial.distance_matrix(x=medioids, y=X, p=self.p)
-    
+
     def get_clusters(self, indices):
         if self.precompute_dist:
             labels = np.argmin(self.dist_mat[:, indices], axis=1)
@@ -28,14 +28,14 @@ class KmedioidsObjective(ObjectiveVectorFunc):
             raise Exception("Not implemented for non precomputed distance matrix.")
 
         return labels
-    
+
     def objective(self, indices):
         score = 0
         values = np.unique(indices)
         if values.size == 1:
-            return -float('inf')
+            return -float("inf")
 
-        labels = self.get_clusters(indices)        
+        labels = self.get_clusters(indices)
         score = self.metric_fn(self.dataset, labels)
-        
+
         return score
