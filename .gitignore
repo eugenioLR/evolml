@@ -10,3 +10,4 @@ docs/_build/
 venv/
 build/
 *.egg*
+hidden/
