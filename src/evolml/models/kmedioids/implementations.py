@@ -1,27 +1,67 @@
 from __future__ import annotations
+from abc import ABC, abstractmethod
 import numpy as np
 import scipy as sp
 from sklearn.base import BaseEstimator, ClusterMixin
 from metaheuristic_designer.algorithms import GeneralAlgorithm
-from metaheuristic_designer.strategies import GA
+from metaheuristic_designer.strategies import GA, HillClimb
 from metaheuristic_designer.initializers import UniformVectorInitializer
 from metaheuristic_designer.operators import OperatorInt
 from metaheuristic_designer.selectionMethods import ParentSelection, SurvivorSelection
 from .Kmedioids_objective import KmedioidsObjective
 
 
-class GeneticKMedioids(BaseEstimator, ClusterMixin):
+class BaseKMedioids(ABC, BaseEstimator, ClusterMixin):
     def __init__(self, k=3, **kwargs):
         self.k = k
         self.medioids = None
-        self.genetic_params = kwargs
+        self.precompute_dist = kwargs.get("precompute_dist", True)
+        self.metric_p = kwargs.get("metric_p", 2)
+        self.metric_fn = kwargs.get("metric_fn", None)
+        self.objfunc = None
+        self.optimizer_params = kwargs
+
+    @abstractmethod
+    def fit(self, X, _y=None):
+        """
+        Find the medioids given a dataset
+        """
+
+    def predict(self, X):
+        dist_mat = self.objfunc.compute_distance(X, self.medioids)
+        return np.argmin(dist_mat, axis=1)
+
+
+class GreedyKMedioids(BaseKMedioids):
+    def __init__(self, k=3, **kwargs):
+        super().__init__(k, **kwargs)
+
+    def fit(self, X, y=None):
+        self.objfunc = KmedioidsObjective(X, k=self.k, precompute_dist=self.precompute_dist, p=self.metric_p, metric_fn=self.metric_fn)
+        initializer = UniformVectorInitializer(self.k, 0, X.shape[0] - 1, pop_size=1, dtype=int)
+
+        strategy = HillClimb(
+            initializer,
+            perturb_op=OperatorInt("mutsample", {"distrib": "uniform", "min": 0, "max": X.shape[0] - 1, "N": 1}),
+        )
+
+        algorithm = GeneralAlgorithm(self.objfunc, strategy, params=self.optimizer_params)
+
+        best_solution, best_fitness = algorithm.optimize()
+        self.medioids = X[best_solution, :]
+
+        return self
+
+
+class GeneticKMedioids(BaseKMedioids):
+    def __init__(self, k=3, **kwargs):
+        super().__init__(k, **kwargs)
         self.pcross = kwargs.get("pcross", 0.9)
         self.pmut = kwargs.get("pmut", 0.1)
         self.pop_size = kwargs.get("pop_size", 100)
-        self.objfunc = None
 
     def fit(self, X, _y=None):
-        self.objfunc = KmedioidsObjective(X, k=self.k)
+        self.objfunc = KmedioidsObjective(X, k=self.k, precompute_dist=self.precompute_dist, p=self.metric_p, metric_fn=self.metric_fn)
         initializer = UniformVectorInitializer(self.k, 0, X.shape[0] - 1, pop_size=self.pop_size, dtype=int)
 
         strategy = GA(
@@ -33,12 +73,9 @@ class GeneticKMedioids(BaseEstimator, ClusterMixin):
             params={"pcross": self.pcross, "pmut": self.pmut},
         )
 
-        algorithm = GeneralAlgorithm(self.objfunc, strategy, params=self.genetic_params)
+        algorithm = GeneralAlgorithm(self.objfunc, strategy, params=self.optimizer_params)
 
         best_solution, best_fitness = algorithm.optimize()
         self.medioids = X[best_solution, :]
-        return self
 
-    def predict(self, X):
-        dist_mat = self.objfunc.compute_distance(X, self.medioids)
-        return np.argmin(dist_mat, axis=1)
+        return self
