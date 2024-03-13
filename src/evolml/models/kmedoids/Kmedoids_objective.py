@@ -16,7 +16,7 @@ class KmedoidsObjective(ObjectiveVectorFunc):
         if metric_fn is None:
             metric_fn = silhouette_score
         self.metric_fn = metric_fn
-        super().__init__(vecsize=k, low_lim=0, up_lim=dataset.shape[0], mode=mode)
+        super().__init__(vecsize=k, low_lim=0, up_lim=dataset.shape[0], mode=mode, name="Kmedoids centroids")
 
     def compute_distance(self, medioids, X):
         return sp.spatial.distance_matrix(x=medioids, y=X, p=self.p)

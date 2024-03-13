@@ -1,2 +1,2 @@
 from .Kmedoids_objective import KmedoidsObjective
-from .implementations import GeneticKMedoids
+from .implementations import GeneticKMedoids, GreedyKMedoids, BaseKMedoids

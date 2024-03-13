@@ -1,5 +1,5 @@
 # EvolML
-This is a machine learning library tightly integrated with metaheuristic-designer that combines evolutionary computing and stochastic optimization techniques with machine learning methods.
+This is a machine learning library tightly integrated with [metaheuristic-designer](https://github.com/eugenioLR/metaheuristic-designer) that combines evolutionary computing and stochastic optimization techniques with machine learning methods.
 
 This library provides the following tools:
 
