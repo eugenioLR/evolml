@@ -5,7 +5,7 @@ from metaheuristic_designer import ObjectiveVectorFunc
 from sklearn.metrics import silhouette_score
 
 
-class KmedioidsObjective(ObjectiveVectorFunc):
+class KmedoidsObjective(ObjectiveVectorFunc):
     def __init__(self, dataset: np.ndarray, k: int = 3, precompute_dist=True, p=2, metric_fn=None, mode="max"):
         self.dataset = dataset
         self.k = k

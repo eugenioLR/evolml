@@ -7,10 +7,10 @@ from metaheuristic_designer.strategies import GA
 from metaheuristic_designer.initializers import UniformVectorInitializer
 from metaheuristic_designer.operators import OperatorInt
 from metaheuristic_designer.selectionMethods import ParentSelection, SurvivorSelection
-from .Kmedioids_objective import KmedioidsObjective
+from .Kmedoids_objective import KmedoidsObjective
 
 
-class GeneticKMedioids(BaseEstimator, ClusterMixin):
+class GeneticKMedoids(BaseEstimator, ClusterMixin):
     def __init__(self, k=3, **kwargs):
         self.k = k
         self.medioids = None
@@ -21,15 +21,15 @@ class GeneticKMedioids(BaseEstimator, ClusterMixin):
         self.objfunc = None
 
     def fit(self, X, _y=None):
-        self.objfunc = KmedioidsObjective(X, k=self.k)
+        self.objfunc = KmedoidsObjective(X, k=self.k)
         initializer = UniformVectorInitializer(self.k, 0, X.shape[0] - 1, pop_size=self.pop_size, dtype=int)
 
         strategy = GA(
             initializer,
             cross_op=OperatorInt("multipoint"),
             mutation_op=OperatorInt("mutsample", {"distrib": "uniform", "min": 0, "max": X.shape[0] - 1, "N": 1}),
-            parent_sel_op=ParentSelection("Tournament", {"amount": 3, "p": 0.8}),
-            selection_op=SurvivorSelection("KeepBest"),
+            parent_sel=ParentSelection("Tournament", {"amount": 3, "p": 0.8}),
+            survivor_sel=SurvivorSelection("KeepBest"),
             params={"pcross": self.pcross, "pmut": self.pmut},
         )
 

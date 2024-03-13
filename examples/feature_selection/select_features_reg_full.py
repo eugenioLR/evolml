@@ -1,7 +1,7 @@
 from evolml.feature_selection import SparseMaskEncoding, EvalFeatureSelectionMaskCV
 from sklearn.linear_model import Ridge
 from sklearn.datasets import make_regression
-from sklearn.model_selection import train_test_split
+from sklearn.model_selection import train_test_split, RepeatedKFold
 from metaheuristic_designer.strategies import GA, SA, LocalSearch
 from metaheuristic_designer.operators import OperatorInt
 from metaheuristic_designer.algorithms import GeneralAlgorithm
@@ -22,8 +22,14 @@ def main(n_features, n_informative):
     baseline_model = Ridge()
 
     objfunc = EvalFeatureSelectionMaskCV(
-        baseline_model, X_train, y_train, n_informative, cv_splits=5, cv_repeats=10
+        baseline_model,
+        X_train,
+        y_train,
+        n_informative,
+        RepeatedKFold(n_splits=5, n_repeats=10),
+        random_state = 0
     )
+
     encoding = SparseMaskEncoding(X_train.shape[1:])
     initializer = UniformVectorInitializer(
         objfunc.vecsize,
@@ -45,8 +51,8 @@ def main(n_features, n_informative):
         initializer,
         mutate_op,
         cross_op,
-        parent_sel_op=parent_sel,
-        selection_op=surv_sel,
+        parent_sel=parent_sel,
+        survivor_sel=surv_sel,
         params={"pmut": 0.05, "pcross": 0.9},
     )
 
@@ -70,4 +76,4 @@ def main(n_features, n_informative):
 
 
 if __name__ == "__main__":
-    main(15, 4)
+    main(50, 10)

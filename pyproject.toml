@@ -23,6 +23,7 @@ dependencies = [
     "pandas",
     "torch",
     "metaheuristic-designer",
+    "hundred-hammers",
     "enlighten",
     "sklearn-neuro-evolution"
 ]
