@@ -2,16 +2,18 @@ from __future__ import annotations
 import numpy as np
 
 
-def restart_model(trained_model):
-    return type(trained_model)(**trained_model.get_params())
-
-
 def sequence_encoding(time_series, nsteps):
     sequence_vec = np.empty((time_series.shape[0] - nsteps, nsteps))
     for idx, val in enumerate(time_series[:-nsteps]):
         sequence_vec[idx] = time_series[idx : idx + nsteps]
     return sequence_vec
 
+
+def apply_time_lag(X, y, lag):
+    pass
+
+def apply_lead_time(X, y, lead):
+    pass
 
 if __name__ == "__main__":
     ex1 = np.array([0, 1, 2, 3, 4, 5, 4, 3, 4, 5, 6, 7, 8, 9, 8, 7, 6, 5, 4, 3, 2, 3, 4, 3, 2, 1, 0])
