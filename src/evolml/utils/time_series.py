@@ -9,11 +9,11 @@ def sequence_encoding(time_series, nsteps):
     return sequence_vec
 
 
-def apply_time_lag(X, y, lag):
-    pass
+def apply_lag_time(X, y, lag):
+    return X[:-lag], y[lag:]
 
 def apply_lead_time(X, y, lead):
-    pass
+    return sequence_encoding(X, lead), y[lead:]
 
 if __name__ == "__main__":
     ex1 = np.array([0, 1, 2, 3, 4, 5, 4, 3, 4, 5, 6, 7, 8, 9, 8, 7, 6, 5, 4, 3, 2, 3, 4, 3, 2, 1, 0])
