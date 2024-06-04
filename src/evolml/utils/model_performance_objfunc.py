@@ -11,7 +11,7 @@ def evaluate_model(model_base, X_train, y_train, metric_fn=None, cross_validator
         cross_validator = RepeatedKFold(n_splits=5, n_repeats=10)
 
     final_score = 0
-    for i, (train_index, test_index) in enumerate(cross_validator.split(X_train)):
+    for i, (train_index, test_index) in enumerate(cross_validator.split(X_train, y_train)):
         X_train_cv = X_train[train_index]
         y_train_cv = y_train[train_index]
         X_test_cv = X_train[test_index]
