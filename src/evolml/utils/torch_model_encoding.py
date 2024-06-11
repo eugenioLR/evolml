@@ -21,15 +21,18 @@ class PytorchModelEncoding(mhd.Encoding):
 
 
 class PytorchModelInitializer(mhd.Initializer):
-    def __init__(self, nn_model, pop_size=1, encoding=None):
+    def __init__(self, nn_model, pop_size=1, encoding=None, **kwargs):
         super().__init__(pop_size, encoding)
         if isinstance(nn_model, nn.Module):
             nn_model = type(nn_model)
         self.nn_model = nn_model
 
+        self.model_kwargs = kwargs
+
     @torch.no_grad()
     def generate_random(self, objfunc):
-        param_vec = np.asarray(torch.nn.utils.parameters_to_vector(self.nn_model().parameters()))
+        param_vec = np.asarray(torch.nn.utils.parameters_to_vector(self.nn_model(**self.model_kwargs).parameters()))
+
         return mhd.Individual(objfunc, param_vec, encoding=self.encoding)
     
     def generate_individual(self, objfunc):
