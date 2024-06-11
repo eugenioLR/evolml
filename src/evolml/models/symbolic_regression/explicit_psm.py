@@ -30,24 +30,26 @@ class ExplicitPSClassifier(BaseEstimator, ClassifierMixin):
     PS (Parametrized symbolic) classifier.
     """
 
-    def __init__(self, expression, params=None):
-        if params is None:
-            params = {
+    def __init__(self, expression, optim_params=None):
+        if optim_params is None:
+            optim_params = {
                 "stop_cond": "time_limit or convergence or fit_target",
                 "time_limit": 60.0,
                 "cpu_time_limit": 10.0,
                 "ngen": 100,
                 "neval": 6e5,
                 "fit_target": 1.0,
-                "patience": 15,
+                "patience": 100,
                 "verbose": True,
                 "v_timer": 0.5,
             }
 
+        self.optim_params = optim_params
+        self.expression = expression
         self.objfunc = ParametricSymbolicClassificationObj(expression)
         self.initializer = initializers.UniformVectorInitializer(self.objfunc.vecsize, self.objfunc.low_lim, self.objfunc.up_lim, pop_size=100)
         self.search_strat = strategies.PSO(self.initializer, {"w": 0.7, "c1": 1.5, "c2": 1.5})
-        self.optim_algorithm = algorithms.GeneralAlgorithm(self.objfunc, self.search_strat, params=params)
+        self.optim_algorithm = algorithms.GeneralAlgorithm(self.objfunc, self.search_strat, params=optim_params)
         self.parameters = None
 
     def fit(self, X, y):
@@ -69,24 +71,26 @@ class ExplicitPSRegressor(BaseEstimator, RegressorMixin):
     PS (Parametrized symbolic) classifier.
     """
 
-    def __init__(self, expression, params=None):
-        if params is None:
-            params = {
-                "stop_cond": "time_limit or convergence or fit_target",
+    def __init__(self, expression, optim_params=None):
+        if optim_params is None:
+            optim_params = {
+                "stop_cond": "time_limit or convergence",
                 "time_limit": 60.0,
                 "cpu_time_limit": 10.0,
                 "ngen": 100,
                 "neval": 6e5,
                 "fit_target": 1.0,
-                "patience": 15,
+                "patience": 100,
                 "verbose": True,
                 "v_timer": 0.5,
             }
+        self.optim_params = optim_params
 
+        self.expression = expression
         self.objfunc = ParametricSymbolicRegressionObj(expression)
         self.initializer = initializers.UniformVectorInitializer(self.objfunc.vecsize, self.objfunc.low_lim, self.objfunc.up_lim, pop_size=100)
         self.search_strat = strategies.PSO(self.initializer, {"w": 0.7, "c1": 1.5, "c2": 1.5})
-        self.optim_algorithm = algorithms.GeneralAlgorithm(self.objfunc, self.search_strat, params=params)
+        self.optim_algorithm = algorithms.GeneralAlgorithm(self.objfunc, self.search_strat, params=optim_params)
         self.parameters = None
 
     def fit(self, X, y):

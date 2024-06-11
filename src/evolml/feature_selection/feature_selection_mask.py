@@ -6,8 +6,7 @@ from metaheuristic_designer.initializers import UniformVectorInitializer
 from functools import reduce
 import numpy as np
 
-from ..utils import restart_model
-from ..model_performance_objfunc import evaluate_model
+from ..utils import restart_model, evaluate_model
 
 
 class SparseMaskEncoding(Encoding):
