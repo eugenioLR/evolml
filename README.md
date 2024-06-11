@@ -14,3 +14,4 @@ This library provides the following tools:
 ### - NEAT
 ### - WANN
 ### - Symbolic regression
+### - RBF Networks (as a layer for pytorch networks) 
