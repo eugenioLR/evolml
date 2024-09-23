@@ -3,7 +3,7 @@ import numpy as np
 import torch
 from torch import nn
 import metaheuristic_designer as mhd
-from copy import copy, deepcopy
+from copy import deepcopy
 
 
 class PytorchModelEncoding(mhd.Encoding):
