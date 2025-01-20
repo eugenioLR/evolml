@@ -1,4 +1,3 @@
-
 import torch
 import scipy as sp
 import numpy as np
@@ -8,10 +7,11 @@ from sklearn.utils.validation import check_X_y, check_array, check_is_fitted
 from sklearn.utils.multiclass import unique_labels
 from sklearn.cluster import KMeans
 
+
 class RBFNNRegressor(BaseEstimator, RegressorMixin):
-    def __init__(self, n_units, linear_layer = None, cluster_model=None, std_from_clusters=False, random_state=None):
+    def __init__(self, n_units, linear_layer=None, cluster_model=None, std_from_clusters=False, random_state=None):
         self.n_units = n_units
-        
+
         if linear_layer is None:
             linear_layer = LinearRegression()
         self.linear_layer = linear_layer
@@ -23,7 +23,7 @@ class RBFNNRegressor(BaseEstimator, RegressorMixin):
         self.std_from_clusters = std_from_clusters
 
         self.random_state = random_state
-    
+
     def _fit_clustering(self, X):
         # Cluster input data into 'n_units' clusters
         self.cluster_model = self.cluster_model.fit(X)
@@ -40,15 +40,15 @@ class RBFNNRegressor(BaseEstimator, RegressorMixin):
         widths = np.empty(self.n_units)
         for idx, X_cluster in enumerate(X_grouped):
             if self.std_from_clusters:
-                widths[idx] = 1/X_cluster.var()
+                widths[idx] = 1 / X_cluster.var()
             else:
                 distance_to_centroid = sp.spatial.distance.cdist(X_cluster, centers[[idx], :])
-                widths[idx] = np.sqrt(2*self.n_units)/distance_to_centroid.max()
+                widths[idx] = np.sqrt(2 * self.n_units) / distance_to_centroid.max()
 
         return centers, widths
-    
+
     def _rbf_layer(self, X, centers, widths):
-        distances = sp.spatial.distance.cdist(X, centers)**2
+        distances = sp.spatial.distance.cdist(X, centers) ** 2
         X_rbf = np.exp(-distances * widths)
         return X_rbf
 
@@ -57,10 +57,10 @@ class RBFNNRegressor(BaseEstimator, RegressorMixin):
 
         self.centers_, self.widths_ = self._fit_clustering(X)
         X_rbf = self._rbf_layer(X, self.centers_, self.widths_)
-        self.linear_layer = self.linear_layer.fit(X_rbf, y)        
+        self.linear_layer = self.linear_layer.fit(X_rbf, y)
 
         return self
-    
+
     def predict(self, X):
         check_is_fitted(self)
         X = check_array(X)
