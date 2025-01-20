@@ -30,7 +30,7 @@ class RBFNNClassifier(RBFNNModel):
                 linear_layer = LogisticRegression(penalty=None, random_state=random_state)
             else:
                 linear_layer = RidgeClassifier(alpha=0, solver="svd", random_state=random_state)
-        
+
         super().__init__(
             n_units=n_units,
             linear_layer=linear_layer,

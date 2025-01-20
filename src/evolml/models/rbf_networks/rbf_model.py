@@ -9,6 +9,7 @@ from sklearn.utils.validation import check_X_y, check_array, check_is_fitted
 from sklearn.utils.multiclass import unique_labels
 from sklearn.cluster import KMeans
 
+
 class RBFNNModel(BaseEstimator, ClassifierMixin):
     """ """
 
@@ -43,8 +44,9 @@ class RBFNNModel(BaseEstimator, ClassifierMixin):
         # Group points by cluster
         cluster_idx_sorted = cluster_idx.copy()
         cluster_idx_sorted.sort()
+        _, cluster_idx_pos = np.unique(cluster_idx_sorted, return_index=True)
         X_sorted = X[cluster_idx.argsort()]
-        X_grouped = np.split(X_sorted, np.unique(cluster_idx_sorted, return_index=True)[1][1:])
+        X_grouped = np.split(X_sorted, cluster_idx_pos[1:])
 
         # Obtain centers and widths
         centers = self.cluster_model.cluster_centers_
