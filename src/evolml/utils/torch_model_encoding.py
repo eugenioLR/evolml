@@ -1,4 +1,5 @@
 from __future__ import annotations
+from typing import Iterable
 import numpy as np
 import torch
 from torch import nn
@@ -11,13 +12,22 @@ class PytorchModelEncoding(mhd.Encoding):
         super().__init__()
         self.nn_model = nn_model
 
-    def encode(self, phenotype: nn.Module):
-        return torch.nn.utils.parameters_to_vector(phenotype.parameters())
+    def encode(self, population: Iterable[nn.Module]) -> np.ndarray:
+        param_list = []
+        for indiv in population:
+            params = torch.nn.utils.parameters_to_vector(indiv.parameters())
+            param_list.append(params)
+        
+        return np.array(params)
 
-    def decode(self, genotype: np.ndarray):
-        new_model = deepcopy(self.nn_model)
-        torch.nn.utils.vector_to_parameters(torch.Tensor(genotype), new_model.parameters())
-        return new_model
+    def decode(self, genotype: np.ndarray) -> Iterable[nn.Module]:
+        model_list = []
+        for i in genotype:
+            new_model = deepcopy(self.nn_model)
+            torch.nn.utils.vector_to_parameters(torch.Tensor(i), new_model.parameters())
+            model_list.append(new_model)
+        
+        return model_list
 
 
 class PytorchModelInitializer(mhd.Initializer):
@@ -30,37 +40,8 @@ class PytorchModelInitializer(mhd.Initializer):
         self.model_kwargs = kwargs
 
     @torch.no_grad()
-    def generate_random(self, objfunc):
-        param_vec = np.asarray(torch.nn.utils.parameters_to_vector(self.nn_model(**self.model_kwargs).parameters()))
+    def generate_random(self):
+        new_model = self.nn_model(**self.model_kwargs).parameters()
+        param_vec = torch.nn.utils.parameters_to_vector(new_model).numpy()
 
-        return mhd.Individual(objfunc, param_vec, encoding=self.encoding)
-    
-    def generate_individual(self, objfunc):
-        return self.generate_random(objfunc)
-
-
-if __name__ == "__main__":
-    class MLP(nn.Module):
-        def __init__(self):
-            super().__init__()
-            self.f1 = nn.Linear(10, 10)
-            self.f2 = nn.Linear(10, 20)
-            self.f3 = nn.Linear(20, 15)
-            self.f4 = nn.Linear(15, 10)
-            self.f5 = nn.Linear(10, 1)
-        
-        def forward(self, x):
-            x = self.ReLU(self.f1(x))
-            x = self.ReLU(self.f2(x))
-            x = self.ReLU(self.f3(x))
-            x = self.ReLU(self.f4(x))
-            return self.f5(x)
-    
-    model = MLP()
-
-    torch_encoding = PytorchModelEncoding(model)
-    params = torch_encoding.encode(model)
-    print(params, params.shape)
-
-    new_model = torch_encoding.decode(params)
-    print(new_model)
+        return param_vec

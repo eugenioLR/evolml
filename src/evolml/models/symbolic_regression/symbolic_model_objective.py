@@ -14,7 +14,7 @@ import sympy
 import sympy.abc
 from sympy.plotting.plot import MatplotlibBackend, Plot
 
-import metaheuristic_designer as pec
+import metaheuristic_designer as mhd
 from metaheuristic_designer import algorithms
 from metaheuristic_designer import strategies
 from metaheuristic_designer import operators
