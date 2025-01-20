@@ -129,7 +129,7 @@ if __name__ == "__main__":
 
     gpeenc = GEPPSMEncoding(15, 7, 4, 4)
 
-    encoded = np.array([1,2,0,2,4,2,3,-1,-1,-2,-3,1,-4,4,-1])
+    encoded = np.array([1, 2, 0, 2, 4, 2, 3, -1, -1, -2, -3, 1, -4, 4, -1])
     # encoded = np.random.randint(-4, 4, size=15)
     tree = gpeenc.decode([encoded])[0]
     print(type(tree))

@@ -4,7 +4,7 @@ import numpy as np
 import torch
 from torch import nn
 import metaheuristic_designer as mhd
-from copy import copy, deepcopy
+from copy import deepcopy
 
 
 class PytorchModelEncoding(mhd.Encoding):
@@ -17,7 +17,7 @@ class PytorchModelEncoding(mhd.Encoding):
         for indiv in population:
             params = torch.nn.utils.parameters_to_vector(indiv.parameters())
             param_list.append(params)
-        
+
         return np.array(params)
 
     def decode(self, genotype: np.ndarray) -> Iterable[nn.Module]:
@@ -26,7 +26,7 @@ class PytorchModelEncoding(mhd.Encoding):
             new_model = deepcopy(self.nn_model)
             torch.nn.utils.vector_to_parameters(torch.Tensor(i), new_model.parameters())
             model_list.append(new_model)
-        
+
         return model_list
 
 

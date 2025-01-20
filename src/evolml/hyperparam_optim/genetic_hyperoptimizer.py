@@ -7,10 +7,12 @@ import pandas as pd
 from sklearn.model_selection import GridSearchCV, RandomizedSearchCV
 from sklearn.metrics import make_scorer
 from sklearn.base import BaseEstimator
+
 # from .config import hh_logger
 # from .hyperparameters import find_hyperparam_grid, find_hyperparam_random
 # from .metric_alias import process_metric
 from hundred_hammers import HyperOptimizer
+
 
 class HyperOptimizerGA(HyperOptimizer):
     """
@@ -35,7 +37,7 @@ class HyperOptimizerGA(HyperOptimizer):
         if not param_grid:
             hh_logger.info(f"No specified hyperparameters for {type(model).__name__}. Generating hyperparameter distributions.")
             param_def = find_hyperparam_def(model)
-        
+
         with warnings.catch_warnings():
             warnings.simplefilter("ignore")
             grid_search_model = RandomizedSearchCV(model, param_grid, scoring=self.metric_fn, n_jobs=-1, cv=self.n_folds_tune, n_iter=self.n_iter)

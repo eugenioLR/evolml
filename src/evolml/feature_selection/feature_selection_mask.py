@@ -75,7 +75,7 @@ class EvalFeatureSelectionMaskCV(ObjectiveVectorFunc):
         X_train_masked = self.X_train[:, solution != 0]
 
         return evaluate_model(self.baseline_model, X_train_masked, self.y_train, metric_fn=self.metric_fn, cross_validator=self.cross_validator)
-    
+
     def repair_solution(self, vector):
         clipped_vector = super().repair_solution(vector)
         _, inverse, counts = np.unique(clipped_vector, return_inverse=True, return_counts=True)
@@ -88,6 +88,7 @@ class EvalFeatureSelectionMaskCV(ObjectiveVectorFunc):
         new_values = np.random.choice(choices, np.count_nonzero(duplicate_indices), replace=False)
         clipped_vector[duplicate_indices] = new_values
         return clipped_vector
+
 
 def select_features(
     optim_algorithm,
