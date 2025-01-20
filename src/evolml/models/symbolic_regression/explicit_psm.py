@@ -54,7 +54,8 @@ class ExplicitPSClassifier(BaseEstimator, ClassifierMixin):
 
     def fit(self, X, y):
         self.objfunc.set_data(X, y)
-        self.parameters, fit = self.optim_algorithm.optimize()
+        result = self.optim_algorithm.optimize()
+        self.parameters, fit = result.best_solution()
         self.model_eq = self.objfunc.equation.subs(zip(self.objfunc.curve_params, self.parameters))
         self.model_fn = sympy.lambdify(self.objfunc.input_params, self.model_eq)
         return self
@@ -95,7 +96,8 @@ class ExplicitPSRegressor(BaseEstimator, RegressorMixin):
 
     def fit(self, X, y):
         self.objfunc.set_data(X, y)
-        self.parameters, fit = self.optim_algorithm.optimize()
+        result = self.optim_algorithm.optimize()
+        self.parameters, fit = result.best_solution()
         self.model_eq = self.objfunc.equation.subs(zip(self.objfunc.curve_params, self.parameters))
         self.model_fn = sympy.lambdify(self.objfunc.input_params, self.model_eq)
         return self

@@ -4,7 +4,7 @@ build-backend = "setuptools.build_meta"
 
 [project]
 name = "evolml"
-version = "0.0.2"
+version = "0.0.3"
 authors = [
     {name = "eugenioLR", email = "eugeniolorente0@gmail.com"}
 ]
@@ -25,7 +25,7 @@ dependencies = [
     "metaheuristic-designer",
     "hundred-hammers",
     "enlighten",
-    "sklearn-neuro-evolution"
+    # "sklearn-neuro-evolution"
 ]
 
 [project.urls]

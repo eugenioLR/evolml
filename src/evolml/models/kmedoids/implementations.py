@@ -42,12 +42,13 @@ class GreedyKMedoids(BaseKMedoids):
 
         strategy = HillClimb(
             initializer,
-            operator=OperatorVector("mutsample", {"distrib": "uniform", "min": 0, "max": X.shape[0] - 1, "N": 1}),
+            operator=OperatorVector("MutSample", {"distrib": "uniform", "min": 0, "max": X.shape[0] - 1, "N": 1}),
         )
 
         algorithm = GeneralAlgorithm(self.objfunc, strategy, params=self.optimizer_params)
 
-        best_solution, best_fitness = algorithm.optimize()
+        result = algorithm.optimize()
+        best_solution, best_fitness = result.best_solution()
         self.medioids = X[best_solution, :]
 
         return self
@@ -66,8 +67,8 @@ class GeneticKMedoids(BaseKMedoids):
 
         strategy = GA(
             initializer,
-            cross_op=OperatorVector("multipoint"),
-            mutation_op=OperatorVector("mutsample", {"distrib": "uniform", "min": 0, "max": X.shape[0] - 1, "N": 1}),
+            cross_op=OperatorVector("Multipoint"),
+            mutation_op=OperatorVector("MutSample", {"distrib": "uniform", "min": 0, "max": X.shape[0] - 1, "N": 1}),
             parent_sel=ParentSelection("Tournament", {"amount": 3, "p": 0.8}),
             survivor_sel=SurvivorSelection("KeepBest"),
             params={"pcross": self.pcross, "pmut": self.pmut},
@@ -75,7 +76,8 @@ class GeneticKMedoids(BaseKMedoids):
 
         algorithm = GeneralAlgorithm(self.objfunc, strategy, params=self.optimizer_params)
 
-        best_solution, best_fitness = algorithm.optimize()
+        result = algorithm.optimize()
+        best_solution, best_fitness = result.best_solution()
         self.medioids = X[best_solution, :]
 
         return self

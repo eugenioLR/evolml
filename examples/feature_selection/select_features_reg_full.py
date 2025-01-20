@@ -3,10 +3,11 @@ from sklearn.linear_model import Ridge
 from sklearn.datasets import make_regression
 from sklearn.model_selection import train_test_split, RepeatedKFold
 from metaheuristic_designer.strategies import GA, SA, LocalSearch
-from metaheuristic_designer.operators import OperatorInt
+from metaheuristic_designer.operators import OperatorVector
 from metaheuristic_designer.algorithms import GeneralAlgorithm
 from metaheuristic_designer.initializers import UniformVectorInitializer
 from metaheuristic_designer.selectionMethods import ParentSelection, SurvivorSelection
+from metaheuristic_designer.encodings import TypeCastEncoding
 
 
 def main(n_features, n_informative):
@@ -30,20 +31,22 @@ def main(n_features, n_informative):
         random_state = 0
     )
 
+    int_encoding = TypeCastEncoding(encoded_dtype=float, decoded_dtype=int)
     encoding = SparseMaskEncoding(X_train.shape[1:])
     initializer = UniformVectorInitializer(
         objfunc.vecsize,
         objfunc.low_lim,
         objfunc.up_lim,
-        pop_size=80,
+        pop_size=100,
         encoding=encoding,
         dtype=int,
     )
 
-    mutate_op = OperatorInt(
-        "MutSample", {"distrib": "Uniform", "min": 0, "max": n_features, "N": 1}
+    mutate_op = OperatorVector(
+        "MutSample", {"distrib": "Uniform", "min": 0, "max": n_features, "N": 1},
+        encoding=int_encoding
     )
-    cross_op = OperatorInt("Multipoint")
+    cross_op = OperatorVector("Multipoint", encoding=int_encoding)
     parent_sel = ParentSelection("Tournament", {"amount": 50, "p": 0.05})
     surv_sel = SurvivorSelection("Elitism", {"amount": 5})
 
@@ -67,8 +70,9 @@ def main(n_features, n_informative):
         },
     )
 
-    sparse_mask, score = optim_algorithm.optimize()
-    mask = encoding.decode(sparse_mask)
+    result = optim_algorithm.optimize()
+    mask, score = result.best_solution(decoded=True)
+    sparse_mask, _ = result.best_solution()
 
     print(f"binary feature mask: {mask}")
     print(f"selected feature indexes: {sparse_mask}")

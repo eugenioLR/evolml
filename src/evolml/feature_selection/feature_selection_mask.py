@@ -15,17 +15,20 @@ class SparseMaskEncoding(Encoding):
         self.size = reduce(lambda x, y: x * y, shape)
 
     def encode(self, phenotype):
-        flat_mat = phenotype.flatten()
-        pos, *_ = np.where(flat_mat != 0)
-        return pos
+        flat_mat = phenotype.reshape((phenotype.shape[0], -1))
+        pos_list = []
+        for p in flat_mat:
+            pos, *_ = np.where(p != 0)
+            pos_list.append(pos)
+        return pos_list
 
     def decode(self, genotype):
         if not isinstance(genotype.dtype, np.integer):
             genotype = genotype.astype(int)
 
-        flat_mask = np.zeros(self.size)
-        flat_mask[[genotype]] = 1
-        return flat_mask.reshape(self.shape)
+        flat_mask = np.zeros((genotype.shape[0], self.size))
+        flat_mask[np.arange(genotype.shape[0])[:, None], genotype] = 1
+        return flat_mask
 
 
 class EvalFeatureSelectionMaskCV(ObjectiveVectorFunc):
@@ -38,6 +41,7 @@ class EvalFeatureSelectionMaskCV(ObjectiveVectorFunc):
         cross_validator=None,
         metric_fn=None,
         random_state=None,
+        recalculate=False,
     ):
         self.baseline_model = baseline_model
         self.X_train = X_train
@@ -63,14 +67,27 @@ class EvalFeatureSelectionMaskCV(ObjectiveVectorFunc):
             mode="max",
             low_lim=0,
             up_lim=n_base_features - 1,
+            recalculate=False,
             name="Evaluate Masked Feature Selection",
         )
 
-    def objective(self, vector):
-        X_train_masked = self.X_train[:, vector != 0]
+    def objective(self, solution):
+        X_train_masked = self.X_train[:, solution != 0]
 
         return evaluate_model(self.baseline_model, X_train_masked, self.y_train, metric_fn=self.metric_fn, cross_validator=self.cross_validator)
+    
+    def repair_solution(self, vector):
+        clipped_vector = super().repair_solution(vector)
+        _, inverse, counts = np.unique(clipped_vector, return_inverse=True, return_counts=True)
+        duplicate_indices = counts[inverse] > 1
 
+        if not np.any(duplicate_indices):
+            return clipped_vector
+
+        choices = np.setdiff1d(np.arange(self.X_train.shape[1]), clipped_vector)
+        new_values = np.random.choice(choices, np.count_nonzero(duplicate_indices), replace=False)
+        clipped_vector[duplicate_indices] = new_values
+        return clipped_vector
 
 def select_features(
     optim_algorithm,
@@ -95,11 +112,13 @@ def select_features(
         objfunc.vecsize,
         objfunc.low_lim,
         objfunc.up_lim,
-        pop_size=100,
+        pop_size=pop_size,
         encoding=encoding,
         dtype=int,
     )
     optim_algorithm.objfunc = objfunc
     optim_algorithm.initializer = initializer
-    best_solution, best_fitness = optim_algorithm.optimize()
-    return encoding.decode(best_solution), best_solution, best_fitness
+    result = optim_algorithm.optimize()
+    best_solution, best_fitness = result.best_solution()
+    best_solution_mask, _ = result.best_solution(decoded=True)
+    return best_solution_mask, best_solution, best_fitness

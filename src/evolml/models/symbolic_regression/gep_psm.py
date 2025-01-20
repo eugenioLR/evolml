@@ -19,7 +19,7 @@ class GEPEncoding(Encoding):
         Too hard to implement and it's not going to be used anyway. :V
         """
 
-        return np.zeros(self.max_size)
+        return np.zeros((phenotype.shape[0], self.max_size))
 
     def _construct_tree(self, genotype):
         """
@@ -68,15 +68,18 @@ class GEPEncoding(Encoding):
 
         return final_str
 
-    def decode(self, genotype):
+    def decode(self, population):
         """
         Transforms a vector into an expression string.
         """
 
-        expr_tree = self._construct_tree(genotype)
-        formula = self._generate_expression(expr_tree)
+        formula_list = []
+        for indiv in population:
+            expr_tree = self._construct_tree(indiv)
+            formula = self._generate_expression(expr_tree)
+            formula_list.append(formula)
 
-        return formula
+        return formula_list
 
 
 class GEPPSMEncoding(GEPEncoding):
@@ -90,16 +93,20 @@ class GEPPSMEncoding(GEPEncoding):
         self.n_params = n_params
 
     def decode(self, genotype):
-        genotype_mod = genotype.copy().astype(object)
-        genotype_int = genotype.astype(int)
-        for idx, val in enumerate(genotype_int[self.op_size :]):
-            adj_idx = idx + self.op_size
-            if val >= 0:
-                genotype_mod[adj_idx] = f"x_{val%self.input_dim}"
-            else:
-                genotype_mod[adj_idx] = f"p_{(-val-1)%self.n_params}"
+        expression_codes = []
 
-        return super().decode(genotype_mod)
+        for indiv in genotype:
+            genotype_mod = indiv.copy().astype(object)
+            genotype_int = indiv.astype(int)
+            for idx, val in enumerate(genotype_int[self.op_size :]):
+                adj_idx = idx + self.op_size
+                if val >= 0:
+                    genotype_mod[adj_idx] = f"x_{val%self.input_dim}"
+                else:
+                    genotype_mod[adj_idx] = f"p_{(-val-1)%self.n_params}"
+            expression_codes.append(genotype_mod)
+
+        return super().decode(expression_codes)
 
 
 class EvalGEPModel(ObjectiveVectorFunc):
@@ -122,9 +129,9 @@ if __name__ == "__main__":
 
     gpeenc = GEPPSMEncoding(15, 7, 4, 4)
 
-    # encoded = np.array([1,2,0,2,4,2,3,-1,-1,-2,-3,1,-4,4,-1])
-    encoded = np.random.randint(-4, 4, size=15)
-    tree = gpeenc.decode(encoded)
+    encoded = np.array([1,2,0,2,4,2,3,-1,-1,-2,-3,1,-4,4,-1])
+    # encoded = np.random.randint(-4, 4, size=15)
+    tree = gpeenc.decode([encoded])[0]
     print(type(tree))
 
     equation = sympy.parsing.sympy_parser.parse_expr(tree)

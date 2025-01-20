@@ -64,7 +64,6 @@ class RBFLayer(nn.Module):
         self.widths.requires_grad = not freeze_widths
 
 
-
     def forward(self, x):
         x = x.view(x.shape + (1,))
         centers = self.centers.view((1,) + self.centers.shape)
