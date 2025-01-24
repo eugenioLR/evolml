@@ -1,1 +1,1 @@
-from .hopfield_network import HopfieldNetwork
+from .hopfield_network import BernoulliHopfieldNetwork
