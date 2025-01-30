@@ -1,3 +1,5 @@
+from __future__ import annotations
+from abc import ABC, abstractmethod
 import sklearn
 from sklearn.base import BaseEstimator, ClassifierMixin, RegressorMixin
 from sklearn.datasets import make_blobs, make_classification
@@ -25,31 +27,33 @@ from metaheuristic_designer.simple import *
 from .symbolic_model_objective import ParametricSymbolicClassificationObj, ParametricSymbolicRegressionObj
 
 
-class ExplicitPSClassifier(BaseEstimator, ClassifierMixin):
+class ExplicitPSModel(ABC, BaseEstimator, ClassifierMixin):
     """
     PS (Parametrized symbolic) classifier.
     """
 
-    def __init__(self, expression, optim_params=None):
-        if optim_params is None:
+    def __init__(self, expression, objfunc, optim_algorithm=None):
+        self.expression = expression
+        self.objfunc = objfunc
+        initializer = initializers.UniformVectorInitializer(objfunc.vecsize, objfunc.low_lim, objfunc.up_lim, pop_size=100)
+        if optim_algorithm is None:
             optim_params = {
-                "stop_cond": "time_limit or convergence or fit_target",
+                "stop_cond": "time_limit or convergence",
                 "time_limit": 60.0,
                 "cpu_time_limit": 10.0,
                 "ngen": 100,
                 "neval": 6e5,
                 "fit_target": 1.0,
-                "patience": 100,
+                "patience": 10,
                 "verbose": True,
                 "v_timer": 0.5,
             }
-
-        self.optim_params = optim_params
-        self.expression = expression
-        self.objfunc = ParametricSymbolicClassificationObj(expression)
-        self.initializer = initializers.UniformVectorInitializer(self.objfunc.vecsize, self.objfunc.low_lim, self.objfunc.up_lim, pop_size=100)
-        self.search_strat = strategies.PSO(self.initializer, {"w": 0.7, "c1": 1.5, "c2": 1.5})
-        self.optim_algorithm = algorithms.GeneralAlgorithm(self.objfunc, self.search_strat, params=optim_params)
+            search_strat = strategies.PSO(initializer, {"w": 0.7, "c1": 1.5, "c2": 1.5})
+            optim_algorithm = algorithms.GeneralAlgorithm(objfunc, search_strat, params=optim_params)
+        else:
+            optim_algorithm.initializer = initializer
+            optim_algorithm.objfunc = objfunc
+        self.optim_algorithm = optim_algorithm
         self.parameters = None
 
     def fit(self, X, y):
@@ -59,6 +63,15 @@ class ExplicitPSClassifier(BaseEstimator, ClassifierMixin):
         self.model_eq = self.objfunc.equation.subs(zip(self.objfunc.curve_params, self.parameters))
         self.model_fn = sympy.lambdify(self.objfunc.input_params, self.model_eq)
         return self
+
+
+class ExplicitPSClassifier(ExplicitPSModel):
+    """
+    PS (Parametrized symbolic) classifier.
+    """
+
+    def __init__(self, expression, optim_algorithm=None):
+        super().__init__(expression=expression, objfunc=ParametricSymbolicClassificationObj(expression), optim_algorithm=optim_algorithm)
 
     def predict(self, X):
         pred = np.empty((X.shape[0], self.objfunc.y_train.shape[1]))
@@ -67,40 +80,13 @@ class ExplicitPSClassifier(BaseEstimator, ClassifierMixin):
         return pred
 
 
-class ExplicitPSRegressor(BaseEstimator, RegressorMixin):
+class ExplicitPSRegressor(ExplicitPSModel):
     """
-    PS (Parametrized symbolic) classifier.
+    PS (Parametrized symbolic) regressor.
     """
 
-    def __init__(self, expression, optim_params=None):
-        if optim_params is None:
-            optim_params = {
-                "stop_cond": "time_limit or convergence",
-                "time_limit": 60.0,
-                "cpu_time_limit": 10.0,
-                "ngen": 100,
-                "neval": 6e5,
-                "fit_target": 1.0,
-                "patience": 100,
-                "verbose": True,
-                "v_timer": 0.5,
-            }
-        self.optim_params = optim_params
-
-        self.expression = expression
-        self.objfunc = ParametricSymbolicRegressionObj(expression)
-        self.initializer = initializers.UniformVectorInitializer(self.objfunc.vecsize, self.objfunc.low_lim, self.objfunc.up_lim, pop_size=100)
-        self.search_strat = strategies.PSO(self.initializer, {"w": 0.7, "c1": 1.5, "c2": 1.5})
-        self.optim_algorithm = algorithms.GeneralAlgorithm(self.objfunc, self.search_strat, params=optim_params)
-        self.parameters = None
-
-    def fit(self, X, y):
-        self.objfunc.set_data(X, y)
-        result = self.optim_algorithm.optimize()
-        self.parameters, fit = result.best_solution()
-        self.model_eq = self.objfunc.equation.subs(zip(self.objfunc.curve_params, self.parameters))
-        self.model_fn = sympy.lambdify(self.objfunc.input_params, self.model_eq)
-        return self
+    def __init__(self, expression, optim_algorithm=None):
+        super().__init__(expression=expression, objfunc=ParametricSymbolicRegressionObj(expression), optim_algorithm=optim_algorithm)
 
     def predict(self, X):
         pred = np.empty((X.shape[0], self.objfunc.y_train.shape[1]))

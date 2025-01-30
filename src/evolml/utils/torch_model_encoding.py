@@ -9,25 +9,17 @@ from copy import deepcopy
 
 class PytorchModelEncoding(mhd.Encoding):
     def __init__(self, nn_model):
-        super().__init__()
+        super().__init__(vectorized=False)
+
         self.nn_model = nn_model
 
-    def encode(self, population: Iterable[nn.Module]) -> np.ndarray:
-        param_list = []
-        for indiv in population:
-            params = torch.nn.utils.parameters_to_vector(indiv.parameters())
-            param_list.append(params)
+    def encode_func(self, solution: nn.Module) -> np.ndarray:
+        return torch.nn.utils.parameters_to_vector(solution.parameters())
 
-        return np.array(params)
-
-    def decode(self, genotype: np.ndarray) -> Iterable[nn.Module]:
-        model_list = []
-        for i in genotype:
-            new_model = deepcopy(self.nn_model)
-            torch.nn.utils.vector_to_parameters(torch.Tensor(i), new_model.parameters())
-            model_list.append(new_model)
-
-        return model_list
+    def decode_func(self, indiv: np.ndarray) -> nn.Module:
+        new_model = deepcopy(self.nn_model)
+        torch.nn.utils.vector_to_parameters(torch.Tensor(indiv), new_model.parameters())
+        return new_model
 
 
 class PytorchModelInitializer(mhd.Initializer):
