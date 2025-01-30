@@ -8,46 +8,41 @@ class GEPEncoding(Encoding):
     """
 
     def __init__(self, max_size, op_size, operators=None):
+        super().__init__(vectorized=False)
+
         self.max_size = max_size
         self.op_size = op_size
         if operators is None:
             operators = [("+", 2), ("-", 2), ("*", 2), ("/", 2), ("x", 0)]
         self.operators = operators
 
-    def encode(self, phenotype):
-        """
-        Too hard to implement and it's not going to be used anyway. :V
-        """
-
-        return np.zeros((phenotype.shape[0], self.max_size))
-
-    def _construct_tree(self, genotype):
+    def _construct_tree(self, vector):
         """
         Transform a vector into an expression tree.
         """
 
         # Go through the vector as a tree in BFS order
-        op_code = int(genotype[0])
+        op_code = int(vector[0])
         op_node = self.operators[op_code]
         expr_tree = [op_node]
         node_queue = [expr_tree]
 
         cursor = 0
-        while len(node_queue) > 0 and cursor < len(genotype):
+        while len(node_queue) > 0 and cursor < len(vector):
             current_tree = node_queue.pop(0)
             _, op_ar = current_tree[0]
 
             for i in range(op_ar):
                 cursor += 1
-                if cursor < len(genotype):
+                if cursor < len(vector):
                     if cursor < self.op_size:
-                        op_code = int(genotype[cursor])
+                        op_code = int(vector[cursor])
                         op_node = self.operators[op_code]
                         new_child = [op_node]
                         current_tree.append(new_child)
                         node_queue.append(new_child)
                     else:
-                        op_node = genotype[cursor], 0
+                        op_node = vector[cursor], 0
                         new_child = [op_node]
                         current_tree.append(new_child)
 
@@ -68,18 +63,21 @@ class GEPEncoding(Encoding):
 
         return final_str
 
-    def decode(self, population):
+    def encode_func(self, solution):
+        """
+        Too hard to implement and it's not going to be used anyway. :V
+        """
+
+        return np.zeros(self.max_size)
+
+    def decode_func(self, indiv):
         """
         Transforms a vector into an expression string.
         """
 
-        formula_list = []
-        for indiv in population:
-            expr_tree = self._construct_tree(indiv)
-            formula = self._generate_expression(expr_tree)
-            formula_list.append(formula)
-
-        return formula_list
+        expr_tree = self._construct_tree(indiv)
+        formula = self._generate_expression(expr_tree)
+        return formula
 
 
 class GEPPSMEncoding(GEPEncoding):
@@ -92,21 +90,16 @@ class GEPPSMEncoding(GEPEncoding):
         self.input_dim = input_dim
         self.n_params = n_params
 
-    def decode(self, genotype):
-        expression_codes = []
-
-        for indiv in genotype:
-            genotype_mod = indiv.copy().astype(object)
-            genotype_int = indiv.astype(int)
-            for idx, val in enumerate(genotype_int[self.op_size :]):
-                adj_idx = idx + self.op_size
-                if val >= 0:
-                    genotype_mod[adj_idx] = f"x_{val%self.input_dim}"
-                else:
-                    genotype_mod[adj_idx] = f"p_{(-val-1)%self.n_params}"
-            expression_codes.append(genotype_mod)
-
-        return super().decode(expression_codes)
+    def decode_func(self, indiv):
+        genotype_mod = indiv.astype(object)
+        genotype_int = indiv.astype(int)
+        for idx, val in enumerate(genotype_int[self.op_size :]):
+            adj_idx = idx + self.op_size
+            if val >= 0:
+                genotype_mod[adj_idx] = f"x_{val%self.input_dim}"
+            else:
+                genotype_mod[adj_idx] = f"p_{(-val-1)%self.n_params}"
+        return super().decode_func(genotype_mod)
 
 
 class EvalGEPModel(ObjectiveVectorFunc):

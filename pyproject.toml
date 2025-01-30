@@ -22,7 +22,7 @@ dependencies = [
     "sympy",
     "pandas",
     "torch",
-    "metaheuristic-designer",
+    "metaheuristic-designer>=0.2.2",
     "hundred-hammers",
     "enlighten",
     # "sklearn-neuro-evolution"

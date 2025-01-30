@@ -11,23 +11,22 @@ from ..utils import restart_model, evaluate_model
 
 class SparseMaskEncoding(Encoding):
     def __init__(self, shape):
+        super().__init__(vectorized=False)
+
         self.shape = shape
         self.size = reduce(lambda x, y: x * y, shape)
 
-    def encode(self, phenotype):
-        flat_mat = phenotype.reshape((phenotype.shape[0], -1))
-        pos_list = []
-        for p in flat_mat:
-            pos, *_ = np.where(p != 0)
-            pos_list.append(pos)
-        return pos_list
+    def encode_func(self, solutio):
+        flat_mat = solution.flatten()
+        pos, *_ = np.where(flat_mat != 0)
+        return pos
 
-    def decode(self, genotype):
+    def decode_func(self, genotype):
         if not isinstance(genotype.dtype, np.integer):
             genotype = genotype.astype(int)
 
-        flat_mask = np.zeros((genotype.shape[0], self.size))
-        flat_mask[np.arange(genotype.shape[0])[:, None], genotype] = 1
+        flat_mask = np.zeros(self.size)
+        flat_mask[[genotype]] = 1
         return flat_mask
 
 
