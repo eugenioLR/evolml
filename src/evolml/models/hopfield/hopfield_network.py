@@ -10,12 +10,13 @@ class BernoulliHopfieldNetwork(BaseEstimator, OneToOneFeatureMixin):
     https://towardsdatascience.com/hopfield-networks-neural-memory-machines-4c94be821073
     """
 
-    def __init__(self, iterations=1, verbose=False):
+    def __init__(self, iterations=1, synchronous=False, verbose=False):
         self.iterations = iterations
+        self.synchronous = synchronous
         self.verbose = verbose
 
-    def energy(self, X_i):
-        return -0.5 * np.einsum('ni,ji,nj->n', X_i, self.coef_, X_i)
+    def energy(self, X):
+        return -0.5 * np.einsum('ni,ji,nj->n', X, self.coef_, X)
 
     def fit(self, X):
         self.is_fitted_ = True
@@ -26,14 +27,15 @@ class BernoulliHopfieldNetwork(BaseEstimator, OneToOneFeatureMixin):
         return self
 
     def _update_network(self, X):
-        X_new = X
-
-        for data_i, X_i in enumerate(X):
-            idx_to_update = np.random.randint(X_i.shape[0])
-            activation_weight = self.coef_[idx_to_update, :] @ X_i
-            X_new[data_i, idx_to_update] = 2*(activation_weight > 0).astype(int) - 1
+        if self.synchronous:
+            activation_weight = np.einsum('ij, nj -> ni', self.coef_, X)
+            X = 2*(activation_weight > 0).astype(int) - 1
+        else:
+            idx_to_update = np.random.randint(X.shape[1], size=X.shape[0])
+            activation_weight = np.einsum('ij, nj -> ni', self.coef_, X)[np.arange(X.shape[0]), idx_to_update]
+            X[np.arange(X.shape[0]), idx_to_update] = 2*(activation_weight > 0).astype(int) - 1
         
-        return X_new
+        return X
 
     def transform(self, X):
         X_new = X.copy()

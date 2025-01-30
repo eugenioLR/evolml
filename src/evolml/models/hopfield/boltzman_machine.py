@@ -14,8 +14,9 @@ class BoltzmanMachine(BaseEstimator, OneToOneFeatureMixin):
         self.iterations = iterations
         self.hidden_units = hidden_units
 
-    def energy(self, state):
-        return -0.5 * X_state.T @ self.coef_ @ X_state
+    def energy(self, X_state):
+        # return -0.5 * X_state.T @ self.coef_ @ X_state
+        return -0.5 * np.einsum('ni,ji,nj->n', X_state, self.coef_, X_state)
     
     def _log_prob_gradient(X_i):
         input_dim = X_i.shape[1]
