@@ -10,8 +10,11 @@ This library provides the following tools:
 <!-- ### - Genetic Algorithm Optimizer  -->
 
 ## Machine learning models
-### - Genetic K-Medoids
+### - K-Medoids
 ### - NEAT
 ### - WANN
 ### - Symbolic regression
-### - RBF Networks (as a layer for pytorch networks) 
+### - RBF Networks (pytorch layer) 
+### - RBF Networks (sklearn models for classification/regression) 
+### - Hopfield Networks 
+
