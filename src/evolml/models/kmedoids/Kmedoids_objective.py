@@ -1,11 +1,11 @@
 from __future__ import annotations
 import numpy as np
 import scipy as sp
-from metaheuristic_designer import ObjectiveVectorFunc
+from metaheuristic_designer import VectorObjectiveFunc
 from sklearn.metrics import silhouette_score
 
 
-class KmedoidsObjective(ObjectiveVectorFunc):
+class KmedoidsObjective(VectorObjectiveFunc):
     def __init__(self, k: int = 3, precompute_dist=True, p=2, metric_fn=None, dataset: np.ndarray = None, mode="max"):
         self.k = k
         self.p = p

@@ -1,8 +1,8 @@
 from copy import copy, deepcopy
 from sklearn.model_selection import RepeatedKFold
 from sklearn.metrics import r2_score
-from metaheuristic_designer import ObjectiveFunc, ObjectiveVectorFunc, Encoding
-from metaheuristic_designer.initializers import UniformVectorInitializer
+from metaheuristic_designer import ObjectiveFunc, VectorObjectiveFunc, Encoding
+from metaheuristic_designer.initializers import UniformInitializer
 from functools import reduce
 import numpy as np
 
@@ -30,7 +30,7 @@ class SparseMaskEncoding(Encoding):
         return flat_mask
 
 
-class EvalFeatureSelectionMaskCV(ObjectiveVectorFunc):
+class EvalFeatureSelectionMaskCV(VectorObjectiveFunc):
     def __init__(
         self,
         baseline_model,

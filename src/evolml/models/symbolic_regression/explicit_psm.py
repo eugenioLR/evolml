@@ -21,7 +21,7 @@ from metaheuristic_designer import algorithms
 from metaheuristic_designer import strategies
 from metaheuristic_designer import operators
 from metaheuristic_designer import initializers
-from metaheuristic_designer import ObjectiveFunc, ObjectiveVectorFunc
+from metaheuristic_designer import ObjectiveFunc, VectorObjectiveFunc
 from metaheuristic_designer.simple import *
 
 from .symbolic_model_objective import ParametricSymbolicClassificationObj, ParametricSymbolicRegressionObj
@@ -35,7 +35,7 @@ class ExplicitPSModel(ABC, BaseEstimator, ClassifierMixin):
     def __init__(self, expression, objfunc, optim_algorithm=None):
         self.expression = expression
         self.objfunc = objfunc
-        initializer = initializers.UniformVectorInitializer(objfunc.vecsize, objfunc.low_lim, objfunc.up_lim, pop_size=100)
+        initializer = initializers.UniformInitializer(objfunc.vecsize, objfunc.low_lim, objfunc.up_lim, pop_size=100)
         if optim_algorithm is None:
             optim_params = {
                 "stop_cond": "time_limit or convergence",

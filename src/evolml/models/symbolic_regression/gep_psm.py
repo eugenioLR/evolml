@@ -1,4 +1,4 @@
-from metaheuristic_designer import Encoding, ObjectiveVectorFunc
+from metaheuristic_designer import Encoding, VectorObjectiveFunc
 import numpy as np
 
 
@@ -102,7 +102,7 @@ class GEPPSMEncoding(GEPEncoding):
         return super().decode_func(genotype_mod)
 
 
-class EvalGEPModel(ObjectiveVectorFunc):
+class EvalGEPModel(VectorObjectiveFunc):
     def __init__(self):
         pass
 

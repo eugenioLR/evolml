@@ -19,11 +19,11 @@ from metaheuristic_designer import algorithms
 from metaheuristic_designer import strategies
 from metaheuristic_designer import operators
 from metaheuristic_designer import initializers
-from metaheuristic_designer import ObjectiveFunc, ObjectiveVectorFunc
+from metaheuristic_designer import ObjectiveFunc, VectorObjectiveFunc
 from metaheuristic_designer.simple import *
 
 
-class ParametricSymbolicModelObj(ObjectiveVectorFunc):
+class ParametricSymbolicModelObj(VectorObjectiveFunc):
     def __init__(self, equation_str, X_train=None, y_train=None, metric_fn=None, mode="max"):
         self.equation_str = equation_str
         self.equation = sympy.parsing.sympy_parser.parse_expr(equation_str)
